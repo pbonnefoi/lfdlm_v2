@@ -1,0 +1,103 @@
+<?php
+/**
+ * @file
+ * Commons functions for Iconic
+ */
+
+function iconic_commons_entity_info_alter(&$entity_info){
+  $entity_info['node']['view modes']['sidebar_teaser'] = array(
+    'label' => t('Sidebar Teaser'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['node']['view modes']['homepage_teaser'] = array(
+    'label' => t('Homepage Teaser'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['node']['view modes']['versus'] = array(
+    'label' => t('Versus'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['node']['view modes']['versus_teaser'] = array(
+    'label' => t('Versus Teaser'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['node']['view modes']['view_teaser'] = array(
+    'label' => t('View Teaser'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['node']['view modes']['entity_ref_teaser'] = array(
+    'label' => t('Entity Ref Teaser'),
+    'custom settings' => TRUE,
+  );
+}
+
+// function iconic_commons_form_node_form_alter(&$form, $form_state, $form_id) {
+//   if ($form_id == 'watch_node_form') {
+//     $form['#validate'][] = 'iconic_commons_auto_link_to_tag_field_validate';
+//   }
+// }
+
+// function iconic_commons_auto_link_to_tag_field_validate(&$form, $form_state) {
+//   $tag_value = '';
+//   if (isset($form['field_watch_category']['und']['#value'])) {
+//     foreach ($form['field_watch_category']['und']['#value'] as $key => $value) {
+//       $term = taxonomy_term_load($value);
+//       $form_state['values']['field_tags']['und'][] = array(
+//         'tid' => 'autocreate',
+//         'vid' => '1',
+//         'name' => $term->name,
+//         'vocabulary_machine_name' => 'tags'
+//       );
+//     }
+//   }
+//   if (isset($form['field_case']['und']['#value'])) {
+//     foreach ($form['field_case']['und']['#value'] as $key => $value) {
+//       $term = taxonomy_term_load($value);
+//       $form_state['values']['field_tags']['und'][] = array(
+//         'tid' => 'autocreate',
+//         'vid' => '1',
+//         'name' => $term->name,
+//         'vocabulary_machine_name' => 'tags'
+//       );
+//     }
+//   }
+//   if (isset($form['field_award_category']['und']['#value']) && $form['field_award_category']['und']['#value'] != '_none') {
+//     $form_state['values']['field_tags']['und'][] = array(
+//       'tid' => 'autocreate',
+//       'vid' => '1',
+//       'name' => $form['field_award_category']['und']['#value'],
+//       'vocabulary_machine_name' => 'tags'
+//     );
+//   }
+//   $form_state['values']['field_tags']['und'][] = array(
+//     'tid' => 'autocreate',
+//     'vid' => '1',
+//     'name' => $form['field_award_category']['und']['#value'],
+//     'vocabulary_machine_name' => 'tags'
+//   );
+// }
+
+function iconic_commons_form_alter(&$form, $form_state, $form_id) {
+  if (in_array($form_id, array('poll_view_voting', 'poll_cancel_form'))) {
+    $form['#prefix'] = '<div id="iconic-commons-votes">';
+    $form['#suffix'] = '</div>';
+    $form['vote']['#ajax'] = array(
+      'callback' => 'iconic_commons_poll_vote_js',
+      'wrapper' => 'iconic-commons-votes',
+      'method' => 'replace',
+      'effect' => 'fade',
+    );
+    $form['vote']['#ajax']['progress']['type'] = 'none';
+  }
+  elseif ($form_id == 'simplenews_block_form_22') {
+    if (isset($form['mail']['#title'])) {
+      $form['mail']['#attributes']['placeholder'] = $form['mail']['#title'];
+    }
+    $form['mail']['#title_display'] = 'invisible';
+  }
+}
+
+function iconic_commons_poll_vote_js($form, $form_state) {
+  $results = poll_view_results($form['#node'], 'full', $block = FALSE);
+  return $results;
+}
